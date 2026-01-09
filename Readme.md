@@ -1,297 +1,258 @@
-# Diveria Scheduler (MVP) — Especificación funcional y técnica
+# Schedia — Agenda de reuniones de Diveria
 
-Fecha: 2026-01-09  
-Objetivo: Definir alcance, reglas, parámetros y responsabilidades (sin diseño visual).
+## Descripción general
 
----
+Schedia es una aplicación web liviana para agendar reuniones con Diveria, inspirada en herramientas tipo Calendly, pero con un diferencial clave:  
+**el cliente agenda con un equipo**, aunque la reunión se crea técnicamente en el calendario de un único anfitrión.
 
-## 1. Objetivo del producto
-
-Construir una página web simple estilo “Calendly”, donde el cliente agenda una reunión con Diveria.
-Aunque se muestra el “equipo”, en el MVP **la reunión se agenda siempre en el calendario de un único anfitrión definido por querystring**.
-
-La aplicación debe:
-- Mostrar disponibilidad (solo “libre”) y permitir reservar un horario.
-- Crear un evento en Google Calendar del anfitrión.
-- Invitar por calendario a cliente + anfitrión.
-- Generar automáticamente un enlace de Google Meet.
-- Enviar (además) un email de notificación de “nuevo agendamiento” (contenido propio).
-- Soportar Español/Inglés, controlado por querystring y por un switch que reescribe la URL.
+El objetivo del MVP es:
+- permitir reservar una llamada de forma simple,
+- aplicar reglas claras de disponibilidad,
+- crear el evento en Google Calendar con Google Meet automático,
+- notificar al anfitrión y al equipo interno de Diveria,
+- y dejar bases sólidas para futura colaboración e integración con CRM (Odoo).
 
 ---
 
-## 2. Alcance del MVP
+## Alcance del MVP
 
 ### Incluye
-- Página web pública con:
-  - Presentación del equipo (informativo).
-  - Calendario/selector de slots disponibles (según reglas).
-  - Formulario para datos del cliente.
-  - Confirmación de reserva.
-- Backend mínimo (recomendado/esperado) para hablar con Google Calendar de forma segura.
-- Parametrización por querystring:
-  - `hostId`: define el anfitrión (obligatorio).
-  - `lang`: idioma (opcional, default definido).
-- Reglas de agenda (ver sección 5).
+- Página web pública de agendamiento.
+- Visualización de disponibilidad (solo slots libres).
+- Reserva de reunión con formulario de datos del cliente.
+- Creación automática de evento en Google Calendar.
+- Invitación por calendario al cliente y al anfitrión.
+- Generación automática de enlace de Google Meet.
+- Notificación interna al equipo de Diveria.
+- Soporte multidioma Español / Inglés.
+- Parametrización por querystring.
 
-### No incluye (explícito)
-- Reprogramación.
-- Cancelación.
-- Links “únicos” de gestión.
-- Selección de anfitrión desde UI (solo querystring).
-- Integración con Odoo (solo se deja preparado).
+### No incluye
+- Reprogramación o cancelación.
+- Links de gestión para el cliente.
+- Selección de anfitrión desde UI.
+- Integración efectiva con Odoo (solo preparación conceptual).
 
 ---
 
-## 3. Actores
+## Actores
 
-- Cliente (visitante): selecciona slot + completa datos.
-- Anfitrión (miembro de Diveria): recibe invitación y evento en su calendario.
-- Sistema: calcula slots, crea evento, dispara notificaciones.
+- **Cliente**  
+  Persona externa que agenda una reunión con Diveria.
 
----
+- **Anfitrión**  
+  Miembro del equipo cuyo calendario se utiliza para crear el evento.  
+  Es asistente obligatorio del evento en Google Calendar.
 
-## 4. Equipo (catálogo)
+- **Equipo Diveria**  
+  Grupo interno que:
+  - es notificado cuando se agenda una llamada,
+  - puede colaborar aportando información previa del cliente o contexto,
+  - no participa necesariamente como asistente del evento.
 
-Listado visible en la página (no implica selección en MVP):
-1. Leandro Marín — Director y Co-founder
-2. Cristian Impini — COO y Co-founder
-3. Marcelo Fassi — Director y Co-founder
-4. Agustín Catellani — Socio
-5. Nicolas Padula — CTO
-
-**Mapeo hostId → calendarId/email**: se define en configuración (backend), no en el frontend.
-
----
-
-## 5. Reglas de agenda (definición cerrada)
-
-- Duración: opciones **30 / 45 / 60 minutos** (definir cómo se elige: por querystring o default).
-- Días/hora habilitados: **lunes a viernes 08:00–18:00** (zona horaria base del negocio).
-- Buffers: **15 min antes y 15 min después** (bloquear slots que violen buffer).
-- Anticipación mínima: el cliente solo puede reservar con al menos **4 horas** de anticipación.
-- Horizonte: mostrar disponibilidad hasta **30 días** hacia adelante.
-- Restricción “out of office”: **no permitir** reservar si el intervalo cae sobre un evento marcado como “out of office”.
-
-**Visualización al cliente**: se muestran únicamente slots disponibles (no se expone detalle de ocupación).
+- **Sistema (Schedia)**  
+  Aplicación que gestiona disponibilidad, reglas, reservas y notificaciones.
 
 ---
 
-## 6. Parámetros por URL (querystring)
+## Equipo Diveria (informativo)
 
-### hostId (obligatorio)
-- Ej: `?hostId=1`
-- Si falta o es inválido: mostrar error “anfitrión inválido” (sin revelar IDs internos ni emails).
+Listado visible en la página (no seleccionable en el MVP):
+1. Leandro Marín — Director y Co-founder  
+2. Cristian Impini — COO y Co-founder  
+3. Marcelo Fassi — Director y Co-founder  
+4. Agustín Catellani — Socio  
+5. Nicolas Padula — CTO  
 
-### lang (opcional)
-- Ej: `?lang=es` o `?lang=en`
-- Default: (definir) `es`.
-- El switch de idioma debe **reescribir la URL** (manteniendo `hostId`).
-
-### duration (pendiente de definición)
-Hay duración con 3 opciones. Falta definir:
-- O bien: `?duration=30|45|60`
-- O bien: selector en UI (pero sin “diseño”, solo decisión de flujo)
-- O bien: duración fija por anfitrión/configuración
-
-> Pendiente: cerrar esta decisión (ver sección 14).
+El anfitrión efectivo se define **exclusivamente por querystring**.
 
 ---
 
-## 7. Datos requeridos del cliente
+## Reglas de agenda (definición cerrada)
 
-Campos:
+- **Duración**: 30 / 45 / 60 minutos.
+- **Días y horario**: lunes a viernes, de 08:00 a 18:00.
+- **Buffers**: 15 minutos antes y 15 minutos después de cada reunión.
+- **Anticipación mínima**: 4 horas.
+- **Horizonte**: hasta 30 días hacia adelante.
+- **Out of Office**: no se permite reservar si el slot intersecta un evento marcado como *out of office*.
+- **Visualización**: solo se muestran slots disponibles, sin exponer eventos ni títulos.
+
+---
+
+## Parámetros por URL (querystring)
+
+- `hostId` (**obligatorio**)  
+  Identifica al anfitrión.  
+  Ejemplo: `?hostId=1`
+
+- `lang` (opcional)  
+  Idioma de la interfaz: `es` | `en`  
+  Default: `es`  
+  El switch de idioma reescribe la URL.
+
+- `duration` (opcional)  
+  Duración de la reunión: `30` | `45` | `60`  
+  Default: `30`
+
+Si `hostId` es inválido o inexistente, se debe mostrar un error genérico sin exponer datos internos.
+
+---
+
+## Datos del cliente
+
+Campos del formulario:
 - Nombre (obligatorio)
 - Email (obligatorio)
 - Empresa (obligatorio)
 - Teléfono (opcional)
-- Motivo (opcional)
+- Motivo de la reunión (opcional)
 
 Validaciones mínimas:
-- Email con formato válido.
-- Longitudes máximas (definir límites para evitar abuso).
-- Sanitización de texto (evitar inyección en descripciones/emails).
+- Formato de email válido.
+- Sanitización de texto.
+- Límites de longitud razonables.
 
 ---
 
-## 8. Comportamiento del sistema (flujo)
+## Flujo funcional
 
-1) El cliente abre URL con `hostId`.  
-2) El frontend pide al backend los slots disponibles para ese anfitrión, en el rango permitido.  
-3) El cliente selecciona un slot (en su zona horaria local).  
-4) Completa formulario y confirma.  
-5) Backend revalida:
-   - slot sigue disponible
-   - cumple anticipación/buffers/horarios
-   - no colisiona con out-of-office
-6) Backend crea evento en el Google Calendar del anfitrión con:
-   - start/end
-   - attendees: anfitrión + cliente
-   - Google Meet automático
-   - `sendUpdates` para que Google notifique a asistentes (según política elegida).
-7) Backend envía email propio de “nuevo agendamiento” (a definir destinatarios).
-8) Frontend muestra confirmación.
+1. El cliente accede a la URL con `hostId`.
+2. El frontend solicita al backend los slots disponibles.
+3. El cliente selecciona un slot (mostrado en su zona horaria).
+4. Completa el formulario y acepta los textos legales.
+5. El backend revalida disponibilidad y reglas.
+6. Se crea el evento en Google Calendar del anfitrión:
+   - con asistentes (cliente + anfitrión),
+   - con Google Meet automático.
+7. Google envía la invitación del calendario.
+8. El sistema envía una notificación interna al equipo Diveria.
+9. El cliente recibe confirmación.
 
 ---
 
-## 9. Integración Google Calendar (puntos técnicos)
+## Autenticación con Google (decisión final)
 
-### 9.1 Disponibilidad
-Usar `freebusy.query` para obtener bloques ocupados y derivar slots disponibles.  
-Referencia oficial: `Freebusy: query` devuelve información free/busy para calendarios. :contentReference[oaicite:0]{index=0}
+Se utiliza **Service Account con Domain-Wide Delegation** en Google Workspace.
 
-### 9.2 Creación de evento + notificaciones
-Usar `events.insert` para crear el evento.  
-El parámetro `sendUpdates` controla el envío de notificaciones a invitados (y reemplaza a `sendNotifications`). :contentReference[oaicite:1]{index=1}
+El backend impersona al anfitrión según `hostId` para:
+- consultar disponibilidad,
+- crear eventos,
+- invitar asistentes.
 
-### 9.3 Google Meet automático
-Crear conferencia mediante `conferenceData.createRequest` y setear `conferenceDataVersion=1` en el request de inserción/modificación.  
-Esto está documentado en el recurso `Events` (conferenceData + conferenceDataVersion). :contentReference[oaicite:2]{index=2}
-
-### 9.4 Service Account y attendees (si aplica)
-Si se usa Service Account, para poblar `attendees` suele requerirse **domain-wide delegation**. La referencia de `events.update` lo menciona explícitamente para service accounts. :contentReference[oaicite:3]{index=3}  
-(La decisión del modelo de autenticación se define en sección 10.)
+Esto evita OAuth por usuario y centraliza la operación.
 
 ---
 
-## 10. Autenticación con Google (decisión necesaria)
+## Detección de disponibilidad y Out of Office
 
-Hay dos enfoques válidos:
+- La disponibilidad general se obtiene mediante `freebusy.query`.
+- Para detectar *out of office* de forma confiable:
+  - se consultan además los eventos del calendario en el rango,
+  - se filtran los eventos con `eventType = outOfOffice`,
+  - cualquier intersección con el slot invalida la reserva.
 
-A) **Service Account + Domain-Wide Delegation (Workspace)**
-- Ventaja: operación centralizada desde backend, sin pedir login al anfitrión.
-- Requiere configuración admin en Google Workspace (delegación por scopes).
-
-B) **OAuth por anfitrión**
-- Cada anfitrión autoriza la app.
-- Más fricción operativa, pero estándar cuando no hay delegación.
-
-**Estado**: pendiente de decisión final.  
-Recomendación técnica (por seguridad y simplicidad operativa en empresa): A, si el admin de Workspace lo habilita.
+La validación se realiza:
+- al listar slots,
+- y nuevamente al confirmar la reserva (anti condición de carrera).
 
 ---
 
-## 11. Backend mínimo (recomendado)
+## Textos legales
 
-Motivo: no exponer credenciales/tokens en frontend y aplicar reglas anti-abuso.
+- Los textos legales son **configuración**, no hardcode.
+- Se almacenan en SQL Server:
+  - por idioma (ES / EN),
+  - con versión activa.
 
-Responsabilidades:
-- Resolver `hostId` → `calendarId` / email anfitrión desde configuración interna.
-- Consultar busy blocks (Google API).
-- Generar slots según reglas.
-- Crear evento y manejar errores/reintentos.
-- Enviar email propio.
-
-Endpoints sugeridos:
-- `GET /api/meta?hostId=1&lang=es` → devuelve datos del anfitrión (nombre/rol) y textos legales (si aplica).
-- `POST /api/availability` → {hostId, rangeStart, rangeEnd, duration} → slots
-- `POST /api/book` → {hostId, slotStart, duration, cliente{...}, lang} → confirmación + datos del evento
-
----
-
-## 12. Cálculo de slots (algoritmo esperado)
-
-Inputs:
-- Rango de búsqueda: ahora → ahora + 30 días
-- Horario laboral: lun–vie 08:00–18:00
-- Busy blocks: `freebusy.query`
-- Duración: 30/45/60
-- Buffers: 15 antes/15 después
-- Lead time: 4 horas
-
-Reglas:
-- Un slot es válido si:
-  - cae dentro de ventana laboral
-  - respeta anticipación mínima
-  - no intersecta busy blocks
-  - no intersecta eventos “out of office”
-  - permite buffers (expandir intervalo del slot por buffers al chequear colisiones)
-
-Salida:
-- Lista de slots “disponibles” en formato ISO con timezone.
-
-Zona horaria:
-- Backend calcula en timezone base del anfitrión/negocio.
-- Frontend muestra en zona horaria del cliente (navegador).
-- El evento se guarda con timezone explícita (definir cuál se usará en start/end).
+Aceptación:
+- Checkbox obligatorio antes de confirmar.
+- Se registra evidencia en la reserva:
+  - versión del texto legal,
+  - fecha/hora UTC,
+  - idioma,
+  - metadatos mínimos (IP si se define).
 
 ---
 
-## 13. Emails y notificaciones
+## Notificaciones
 
-1) Invitación del calendario:
-- Controlada por Google mediante `sendUpdates` al crear el evento. :contentReference[oaicite:4]{index=4}
+### Invitación de calendario
+- Enviada automáticamente por Google Calendar.
+- Destinatarios: cliente + anfitrión.
+- Incluye enlace de Google Meet.
 
-2) Email propio “Nuevo agendamiento”:
-- Enviado por el backend.
-- Destinatarios: (definir) al menos anfitrión; opcional copia interna.
-- Plantilla bilingüe según `lang`.
+### Notificación interna Diveria
+- Enviada por el backend.
+- Destinatarios: lista configurable del equipo Diveria.
+- Contenido mínimo:
+  - nombre del cliente,
+  - empresa,
+  - email,
+  - fecha y hora,
+  - anfitrión asignado.
 
----
-
-## 14. Configuración y parámetros (pendientes por cerrar)
-
-### 14.1 Duración (pendiente)
-Decidir uno:
-- A) por querystring `duration=30|45|60`
-- B) selector en UI
-- C) fijo por anfitrión/config
-
-### 14.2 “Out of office” (pendiente de detalle)
-Definir cómo se detecta:
-- Por `eventType=outOfOffice` (si se usa Calendar API v3 y lo provee en Events) o
-- Por `transparency/visibility` + `summary` (menos confiable) o
-- Política: tratar cualquier busy como bloqueo y además requerir marca OOO para una regla especial.
-
-> Nota: esta parte es crítica; si no se define bien, el sistema no puede garantizar “no agendar sobre OOO”.
-
-### 14.3 Textos legales
-Se indicó: “mensaje legal será un parámetro de la app”.
-Definir:
-- dónde vive (config backend / CMS / env var)
-- si cambia por idioma
-- si debe mostrarse antes de confirmar (checkbox o texto fijo)
-
-### 14.4 Seguridad anti-abuso
-Definir mínimos:
-- rate limiting por IP
-- captcha (sí/no)
-- bloqueo por dominios de email descartables (sí/no)
+El equipo no se agrega como asistente del evento.
 
 ---
 
-## 15. Registro y auditoría
+## Anti-abuso (mínimo obligatorio)
 
-Backend debe registrar:
-- intentos de reserva (con resultado)
-- errores de Google API
-- datos mínimos para soporte (sin almacenar más de lo necesario)
-
----
-
-## 16. Extensión futura: Odoo CRM
-
-Evento futuro: crear/registrar “reunión agendada” en Odoo CRM cuando la reserva se confirma.
-Recomendado:
-- diseñar un “hook” interno (cola/evento) para agregar la integración sin tocar el flujo principal.
+- **Rate limiting por IP**:
+  - `/availability`: límite alto (ej. 60 req/min).
+  - `/book`: límite estricto (ej. 10 req/h).
+- **Captcha** solo en el endpoint de booking.
+- **Idempotencia** para evitar reservas duplicadas.
+- Validación completa del lado servidor.
 
 ---
 
-## 17. Criterios de aceptación (MVP)
+## Stack tecnológico
 
-- Dada una URL válida con `hostId`, se muestran slots disponibles hasta 30 días.
-- Los slots respetan lun–vie 08–18, buffers, y anticipación de 4h.
-- Se puede reservar un slot completando los campos requeridos.
-- Se crea un evento en el calendario del anfitrión con invitación al cliente.
-- El evento incluye enlace de Google Meet.
-- Se envía notificación (Google) y email propio de “nuevo agendamiento”.
-- Se puede cambiar idioma con switch y queda reflejado en la URL.
+### Frontend
+- HTML5
+- CSS
+- TailwindCSS
+- JavaScript (vanilla)
+
+React:
+- No se usa en el MVP.
+- Solo se evaluará si aparece complejidad de estado no trivial.
+
+### Backend
+- .NET (ASP.NET Core)
+- C#
+- Minimal APIs o Web API
+- Google Calendar API v3
+
+### Base de datos
+- SQL Server
+
+Uso previsto:
+- reservas (bookings),
+- auditoría básica,
+- configuración (hostId, textos legales, notificaciones).
 
 ---
 
-## 18. Fuera de alcance (reiteración)
+## Preparación para futuras extensiones
 
-- Reprogramación/cancelación
-- Gestión por link único
-- UI para elegir anfitrión
-- Odoo CRM (solo preparación)
+- Integración con Odoo CRM:
+  - evento “reunión agendada”.
+- Colaboración interna enriquecida (comentarios, contexto).
+- Reprogramación / cancelación.
+- Métricas y reporting.
+
+---
+
+## Estado del documento
+
+Este README define **qué hace el sistema y cómo**, sin entrar en diseño visual ni implementación detallada.
+
+Con este documento:
+- el alcance está cerrado,
+- las decisiones críticas están tomadas,
+- el desarrollo puede comenzar sin ambigüedades.
+
+Link a conversacion:
+https://chatgpt.com/g/g-p-685ff79c67a48191a56aaf3db17032d8-diseno-desde-cero/c/69611a28-6730-8331-bbe8-cc3919fe2d8e 
