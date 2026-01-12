@@ -1,0 +1,164 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Schedia | Agenda con Diveria</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@300;400;600&family=Space+Grotesk:wght@400;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="page">
+      <header class="hero" aria-live="polite">
+        <div class="brand">Schedia</div>
+        <h1>Agenda una reunion con el equipo de Diveria</h1>
+        <p>
+          Selecciona un horario para reunirte con nuestro equipo. El anfitrion
+          se define por el link y tu reunion se agenda con foco total.
+        </p>
+        <div class="hero-meta">
+          <span class="pill" id="host-pill">Host: --</span>
+          <span class="pill" id="tz-pill">Zona horaria: --</span>
+          <button class="pill ghost" id="lang-toggle" type="button">
+            Idioma: ES
+          </button>
+        </div>
+        <div class="hero-error" id="app-error" hidden></div>
+      </header>
+
+      <main class="grid">
+        <section class="card team">
+          <div class="card-title">Conoce al equipo</div>
+          <p class="card-subtitle">
+            Lideres dedicados a impulsar tu transformacion digital.
+          </p>
+          <ul class="team-list" id="team-list"></ul>
+        </section>
+
+        <section class="card scheduler">
+          <div class="card-title">Selecciona fecha y hora</div>
+          <p class="card-subtitle">
+            Disponibilidad real segun el calendario del anfitrion.
+          </p>
+
+          <div class="section">
+          <div class="label">Duracion de la reunion</div>
+            <div class="duration-toggle" id="duration-toggle">
+              <button class="chip" data-minutes="30" type="button">30 min</button>
+              <button class="chip" data-minutes="45" type="button">45 min</button>
+              <button class="chip" data-minutes="60" type="button">60 min</button>
+            </div>
+          </div>
+
+          <div class="section calendar">
+            <div class="calendar-head">
+              <button class="icon-btn" id="prev-month" type="button">&#8592;</button>
+              <div class="calendar-title" id="calendar-title">Mes</div>
+              <button class="icon-btn" id="next-month" type="button">&#8594;</button>
+            </div>
+            <div class="calendar-weekdays">
+              <span>Dom</span><span>Lun</span><span>Mar</span><span>Mie</span
+              ><span>Jue</span><span>Vie</span><span>Sab</span>
+            </div>
+            <div class="calendar-grid" id="calendar-grid"></div>
+            <div class="calendar-hint" id="calendar-hint">
+              Selecciona un dia para ver horarios disponibles.
+            </div>
+          </div>
+
+          <div class="section slots" aria-live="polite">
+            <div class="label">Horarios disponibles</div>
+            <div class="slot-grid" id="slot-grid"></div>
+          </div>
+
+          <div class="section form-section" id="form-section">
+            <div class="label">Tus datos</div>
+            <form id="booking-form">
+              <div class="form-error" id="form-error" role="alert" hidden></div>
+              <div class="field">
+                <label for="client-name">Nombre</label>
+                <input
+                  id="client-name"
+                  name="name"
+                  type="text"
+                  required
+                  minlength="2"
+                  maxlength="120"
+                  autocomplete="name"
+                />
+              </div>
+              <div class="field">
+                <label for="client-email">Email</label>
+                <input
+                  id="client-email"
+                  name="email"
+                  type="email"
+                  required
+                  maxlength="254"
+                  autocomplete="email"
+                />
+              </div>
+              <div class="field">
+                <label for="client-company">Empresa</label>
+                <input
+                  id="client-company"
+                  name="company"
+                  type="text"
+                  required
+                  minlength="2"
+                  maxlength="120"
+                  autocomplete="organization"
+                />
+              </div>
+              <div class="field">
+                <label for="client-phone">Telefono</label>
+                <input
+                  id="client-phone"
+                  name="phone"
+                  type="tel"
+                  maxlength="40"
+                  autocomplete="tel"
+                />
+              </div>
+              <div class="field">
+                <label for="client-reason">Motivo</label>
+                <textarea
+                  id="client-reason"
+                  name="reason"
+                  rows="3"
+                  maxlength="400"
+                ></textarea>
+              </div>
+              <div class="legal">
+                <div class="legal-title">Texto legal</div>
+                <div class="legal-body" id="legal-body">Cargando...</div>
+                <label class="checkbox">
+                  <input id="legal-accept" type="checkbox" required />
+                  Acepto el texto legal vigente.
+                </label>
+              </div>
+              <div class="form-actions">
+                <button class="primary" id="book-btn" type="submit">
+                  Confirmar reserva
+                </button>
+                <span class="form-note" id="form-note"></span>
+              </div>
+            </form>
+          </div>
+
+          <div class="section confirmation" id="confirmation" hidden>
+            <div class="confirmation-title">Reserva confirmada</div>
+            <p id="confirmation-text"></p>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <script src="app.js"></script>
+  </body>
+</html>

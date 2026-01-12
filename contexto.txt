@@ -1,0 +1,51 @@
+Resumen de trabajo (hasta ahora)
+
+Backend
+- .NET 8 (ASP.NET Core Minimal APIs) en src/Schedia.Api.
+- EF Core con SQL Server.
+- DB Context y entidades en src/Schedia.Api/Data.
+- Migracion inicial creada y aplicada (InitialCreate).
+- Endpoints implementados:
+  - GET /api/meta?hostId=1&lang=es
+  - POST /api/availability (reglas reales: 08–18, lun–vie, buffer 15, +4h, horizonte 30 dias)
+  - POST /api/book (idempotencia y validaciones de reglas).
+- CORS habilitado en Development (DevCors).
+- Connection string en appsettings.json y appsettings.Development.json.
+
+Base de datos
+- SQL Server (PCMEDIA\SQLEXPRESS), DB: Schedia.
+- Esquema y seed en docs/schema.sql y docs/seed.sql.
+- Seed aplicado (hosts, legal texts, recipients).
+
+Frontend
+- Front estatico separado en frontend/ (index.html, styles.css, app.js).
+- Consume el backend por defecto en http://localhost:5002.
+- UI inspirada en referencia: hero, equipo, calendario, slots, formulario, confirmacion.
+- Validaciones basicas y accesibilidad (required, min/max, aria-invalid, mensajes de error).
+
+Como correr ahora
+- Backend:
+  dotnet run --project src/Schedia.Api --environment Development --urls "http://localhost:5002"
+- Frontend:
+  dotnet-serve -d d:\Work\Schedia\frontend -p 5174
+  Abrir: http://localhost:5174?hostId=1
+
+Puntos a continuar
+1) Frontend
+- Localizacion completa ES/EN (textos UI y mensajes).
+- Manejo de errores del backend (404 host invalido, 409 solapamiento).
+- Resumen previo a confirmar y estados de loading/success/error mas claros.
+
+2) Backend
+- Limpiar warning EF (HasCheckConstraint obsoleto -> ToTable(...)).
+- Validaciones mas detalladas en /api/book.
+- Integracion real con Google Calendar (freebusy, OOO, eventos y meet).
+
+3) Infra / Dev
+- Pasar connection string a User Secrets.
+- CORS mas restringido para produccion.
+
+Resumen de tecnologias
+- BD: SQL Server + schema/seed SQL.
+- Backend: .NET 8, ASP.NET Core Minimal APIs, EF Core, Swagger.
+- Frontend: HTML5, CSS3, JavaScript (vanilla). Servido con dotnet-serve.
