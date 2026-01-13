@@ -1,51 +1,37 @@
-Resumen de trabajo (hasta ahora)
+Resumen de avance (backend + frontend)
 
 Backend
-- .NET 8 (ASP.NET Core Minimal APIs) en src/Schedia.Api.
-- EF Core con SQL Server.
-- DB Context y entidades en src/Schedia.Api/Data.
-- Migracion inicial creada y aplicada (InitialCreate).
-- Endpoints implementados:
-  - GET /api/meta?hostId=1&lang=es
-  - POST /api/availability (reglas reales: 08–18, lun–vie, buffer 15, +4h, horizonte 30 dias)
-  - POST /api/book (idempotencia y validaciones de reglas).
-- CORS habilitado en Development (DevCors).
-- Connection string en appsettings.json y appsettings.Development.json.
-
-Base de datos
-- SQL Server (PCMEDIA\SQLEXPRESS), DB: Schedia.
-- Esquema y seed en docs/schema.sql y docs/seed.sql.
-- Seed aplicado (hosts, legal texts, recipients).
+- EF Core con SQL Server configurado; migracion inicial aplicada.
+- Mapeo actualizado para eliminar warning de HasCheckConstraint (usa ToTable(...).HasCheckConstraint(...)).
+- /api/book valida longitudes, campos obligatorios y formato de email.
+- Integracion Google Calendar agregada:
+  - freebusy.query para disponibilidad.
+  - bloqueo por eventos outOfOffice.
+  - creacion de eventos con Google Meet.
+- Helper de autenticacion y opciones:
+  - src/Schedia.Api/Google/GoogleAuthHelper.cs
+  - src/Schedia.Api/Google/GoogleAuthOptions.cs
+  - src/Schedia.Api/Google/GoogleCalendarOptions.cs
+- Paquetes agregados: Google.Apis.Auth, Google.Apis.Calendar.v3.
 
 Frontend
-- Front estatico separado en frontend/ (index.html, styles.css, app.js).
-- Consume el backend por defecto en http://localhost:5002.
-- UI inspirada en referencia: hero, equipo, calendario, slots, formulario, confirmacion.
-- Validaciones basicas y accesibilidad (required, min/max, aria-invalid, mensajes de error).
+- UI estatica completa en frontend/ con calendario, slots, formulario y confirmacion.
+- Localizacion ES/EN aplicada a textos, labels, estados y dias de la semana.
+- Manejo de errores mas claro (400/404/409/429) y resumen previo.
+- Validaciones y accesibilidad (min/max, aria-invalid, mensajes y estados).
 
-Como correr ahora
-- Backend:
-  dotnet run --project src/Schedia.Api --environment Development --urls "http://localhost:5002"
-- Frontend:
-  dotnet-serve -d d:\Work\Schedia\frontend -p 5174
-  Abrir: http://localhost:5174?hostId=1
+Docs y utilidades
+- docs/run-and-test.md con comandos y URLs.
+- docs/google-service-account.md actualizado con configuracion.
 
-Puntos a continuar
-1) Frontend
-- Localizacion completa ES/EN (textos UI y mensajes).
-- Manejo de errores del backend (404 host invalido, 409 solapamiento).
-- Resumen previo a confirmar y estados de loading/success/error mas claros.
+Donde correr
+- Backend: dotnet run --project src/Schedia.Api --environment Development --urls "http://localhost:5002"
+- Frontend: dotnet-serve -d d:\Work\Schedia\frontend -p 5174
+- Front: http://localhost:5174?hostId=1
+- Swagger: http://localhost:5002/swagger
 
-2) Backend
-- Limpiar warning EF (HasCheckConstraint obsoleto -> ToTable(...)).
-- Validaciones mas detalladas en /api/book.
-- Integracion real con Google Calendar (freebusy, OOO, eventos y meet).
-
-3) Infra / Dev
-- Pasar connection string a User Secrets.
-- CORS mas restringido para produccion.
-
-Resumen de tecnologias
-- BD: SQL Server + schema/seed SQL.
-- Backend: .NET 8, ASP.NET Core Minimal APIs, EF Core, Swagger.
-- Frontend: HTML5, CSS3, JavaScript (vanilla). Servido con dotnet-serve.
+Pendiente para la proxima sesion
+1) Configurar credenciales reales de Google (user-secrets) y probar:
+   - freebusy, deteccion de outOfOffice y creacion de evento/Meet.
+2) Ajustar y validar reglas reales con eventos reales del calendario.
+3) Endurecer CORS y mover secrets fuera de appsettings.json.
