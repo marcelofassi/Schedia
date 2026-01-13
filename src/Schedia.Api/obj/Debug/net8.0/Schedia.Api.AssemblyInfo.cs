@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("Schedia.Api")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+a9b6084166fa0aa3811da551d9d03058f1a02997")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+109d06385d964e96ec2ec90b5bbf2d9776095aa8")]
 [assembly: System.Reflection.AssemblyProductAttribute("Schedia.Api")]
 [assembly: System.Reflection.AssemblyTitleAttribute("Schedia.Api")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

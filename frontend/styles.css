@@ -417,6 +417,20 @@ textarea[aria-invalid="true"] {
   font-size: 1.2rem;
 }
 
+.review-card {
+  border: 1px dashed var(--border);
+  padding: 12px;
+  border-radius: 12px;
+  background: #fff;
+  color: var(--muted);
+  display: grid;
+  gap: 6px;
+}
+
+.review-card strong {
+  color: var(--ink);
+}
+
 @keyframes rise {
   from {
     opacity: 0;

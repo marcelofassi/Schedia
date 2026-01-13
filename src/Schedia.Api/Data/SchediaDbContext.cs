@@ -72,7 +72,11 @@ public class SchediaDbContext : DbContext
 
         modelBuilder.Entity<Booking>(entity =>
         {
-            entity.ToTable("Bookings");
+            entity.ToTable("Bookings", table =>
+            {
+                table.HasCheckConstraint("CK_Bookings_Duration", "[DurationMinutes] IN (30,45,60)");
+                table.HasCheckConstraint("CK_Bookings_Status", "[Status] IN ('booked','failed')");
+            });
             entity.HasKey(x => x.BookingId);
 
             entity.Property(x => x.DurationMinutes).IsRequired();
@@ -105,8 +109,6 @@ public class SchediaDbContext : DbContext
             entity.HasIndex(x => new { x.HostId, x.StartUtc });
             entity.HasIndex(x => x.ClientEmail);
 
-            entity.HasCheckConstraint("CK_Bookings_Duration", "[DurationMinutes] IN (30,45,60)");
-            entity.HasCheckConstraint("CK_Bookings_Status", "[Status] IN ('booked','failed')");
         });
 
         modelBuilder.Entity<BookingIdempotency>(entity =>

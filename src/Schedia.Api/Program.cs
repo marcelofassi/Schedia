@@ -2,6 +2,10 @@ using Microsoft.EntityFrameworkCore;
 using Schedia.Api.Contracts;
 using Schedia.Api.Data;
 using Schedia.Api.Data.Entities;
+using Schedia.Api.Google;
+using Google.Apis.Calendar.v3;
+using Google.Apis.Calendar.v3.Data;
+using Google.Apis.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -16,6 +20,9 @@ builder.Services.AddCors(options =>
             .AllowAnyHeader()
             .AllowAnyMethod());
 });
+builder.Services.Configure<GoogleAuthOptions>(builder.Configuration.GetSection("GoogleAuth"));
+builder.Services.Configure<GoogleCalendarOptions>(builder.Configuration.GetSection("GoogleCalendar"));
+builder.Services.AddSingleton<GoogleAuthHelper>();
 
 var app = builder.Build();
 
@@ -126,6 +133,71 @@ app.MapPost("/api/availability", async (SchediaDbContext db, AvailabilityRequest
         .Select(b => new { b.StartUtc, b.EndUtc })
         .ToListAsync();
 
+    var calendarBusyRanges = new List<(DateTime StartUtc, DateTime EndUtc)>();
+    var hasGoogle = app.Services.GetRequiredService<GoogleAuthHelper>().IsConfigured();
+
+    if (hasGoogle)
+    {
+        var googleAuth = app.Services.GetRequiredService<GoogleAuthHelper>();
+        var googleOptions = app.Services.GetRequiredService<Microsoft.Extensions.Options.IOptions<GoogleCalendarOptions>>().Value;
+        var credential = googleAuth.CreateCredential(host.Email);
+        var calendarService = new CalendarService(new BaseClientService.Initializer
+        {
+            HttpClientInitializer = credential,
+            ApplicationName = googleOptions.ApplicationName
+        });
+
+        var freebusyRequest = new FreeBusyRequest
+        {
+            TimeMinDateTimeOffset = rangeStartUtc,
+            TimeMaxDateTimeOffset = rangeEndUtc,
+            TimeZone = "UTC",
+            Items = new List<FreeBusyRequestItem>
+            {
+                new FreeBusyRequestItem { Id = host.CalendarId }
+            }
+        };
+
+        var freebusyResponse = await calendarService.Freebusy.Query(freebusyRequest).ExecuteAsync();
+        if (freebusyResponse?.Calendars != null &&
+            freebusyResponse.Calendars.TryGetValue(host.CalendarId, out var calendar))
+        {
+            foreach (var busy in calendar.Busy)
+            {
+                if (busy.StartDateTimeOffset.HasValue && busy.EndDateTimeOffset.HasValue)
+                {
+                    calendarBusyRanges.Add((busy.StartDateTimeOffset.Value.UtcDateTime, busy.EndDateTimeOffset.Value.UtcDateTime));
+                }
+            }
+        }
+
+        var eventsRequest = calendarService.Events.List(host.CalendarId);
+        eventsRequest.TimeMinDateTimeOffset = rangeStartUtc;
+        eventsRequest.TimeMaxDateTimeOffset = rangeEndUtc;
+        eventsRequest.SingleEvents = true;
+        eventsRequest.ShowDeleted = false;
+        eventsRequest.MaxResults = 250;
+
+        var events = await eventsRequest.ExecuteAsync();
+        if (events?.Items != null)
+        {
+            foreach (var calendarEvent in events.Items)
+            {
+                if (calendarEvent.EventType != "outOfOffice")
+                {
+                    continue;
+                }
+
+                var start = calendarEvent.Start?.DateTimeDateTimeOffset;
+                var end = calendarEvent.End?.DateTimeDateTimeOffset;
+                if (start.HasValue && end.HasValue)
+                {
+                    calendarBusyRanges.Add((start.Value.UtcDateTime, end.Value.UtcDateTime));
+                }
+            }
+        }
+    }
+
     var slots = new List<AvailableSlot>();
     var duration = TimeSpan.FromMinutes(request.DurationMinutes);
     var buffer = TimeSpan.FromMinutes(15);
@@ -155,6 +227,13 @@ app.MapPost("/api/availability", async (SchediaDbContext db, AvailabilityRequest
                 var overlaps = bookedRanges.Any(b =>
                     slotStartUtc < b.EndUtc.Add(buffer) &&
                     slotEndUtc > b.StartUtc.Subtract(buffer));
+
+                if (!overlaps && calendarBusyRanges.Count > 0)
+                {
+                    overlaps = calendarBusyRanges.Any(b =>
+                        slotStartUtc < b.EndUtc.Add(buffer) &&
+                        slotEndUtc > b.StartUtc.Subtract(buffer));
+                }
 
                 if (!overlaps)
                 {
@@ -200,6 +279,34 @@ app.MapPost("/api/book", async (SchediaDbContext db, BookRequest request) =>
             GoogleEventId = existingKey.Booking.GoogleEventId ?? string.Empty,
             GoogleMeetLink = existingKey.Booking.GoogleMeetLink ?? string.Empty
         });
+    }
+
+    if (string.IsNullOrWhiteSpace(request.Client.Name) ||
+        request.Client.Name.Length > 120 ||
+        string.IsNullOrWhiteSpace(request.Client.Email) ||
+        request.Client.Email.Length > 254 ||
+        string.IsNullOrWhiteSpace(request.Client.Company) ||
+        request.Client.Company.Length > 120)
+    {
+        return Results.BadRequest();
+    }
+
+    if (request.Client.Phone?.Length > 40 || request.Client.Reason?.Length > 400)
+    {
+        return Results.BadRequest();
+    }
+
+    try
+    {
+        var emailAddress = new System.Net.Mail.MailAddress(request.Client.Email);
+        if (!string.Equals(emailAddress.Address, request.Client.Email, StringComparison.OrdinalIgnoreCase))
+        {
+            return Results.BadRequest();
+        }
+    }
+    catch
+    {
+        return Results.BadRequest();
     }
 
     var host = await db.Hosts
@@ -266,6 +373,91 @@ app.MapPost("/api/book", async (SchediaDbContext db, BookRequest request) =>
         return Results.Conflict();
     }
 
+    var hasGoogle = app.Services.GetRequiredService<GoogleAuthHelper>().IsConfigured();
+    string? googleEventId = null;
+    string? googleMeetLink = null;
+
+    if (hasGoogle)
+    {
+        var googleAuth = app.Services.GetRequiredService<GoogleAuthHelper>();
+        var googleOptions = app.Services.GetRequiredService<Microsoft.Extensions.Options.IOptions<GoogleCalendarOptions>>().Value;
+        var credential = googleAuth.CreateCredential(host.Email);
+        var calendarService = new CalendarService(new BaseClientService.Initializer
+        {
+            HttpClientInitializer = credential,
+            ApplicationName = googleOptions.ApplicationName
+        });
+
+        var buffer = TimeSpan.FromMinutes(15);
+        var windowStartUtc = slotStartUtc.Subtract(buffer);
+        var windowEndUtc = slotEndUtc.Add(buffer);
+
+        var outOfOfficeRequest = calendarService.Events.List(host.CalendarId);
+        outOfOfficeRequest.TimeMinDateTimeOffset = windowStartUtc;
+        outOfOfficeRequest.TimeMaxDateTimeOffset = windowEndUtc;
+        outOfOfficeRequest.SingleEvents = true;
+        outOfOfficeRequest.ShowDeleted = false;
+        outOfOfficeRequest.MaxResults = 250;
+
+        var outOfOfficeEvents = await outOfOfficeRequest.ExecuteAsync();
+        if (outOfOfficeEvents?.Items != null)
+        {
+            foreach (var calendarEvent in outOfOfficeEvents.Items)
+            {
+                if (calendarEvent.EventType != "outOfOffice")
+                {
+                    continue;
+                }
+
+                var start = calendarEvent.Start?.DateTimeDateTimeOffset;
+                var end = calendarEvent.End?.DateTimeDateTimeOffset;
+                if (start.HasValue && end.HasValue)
+                {
+                    var overlaps = windowStartUtc < end.Value.UtcDateTime &&
+                                   windowEndUtc > start.Value.UtcDateTime;
+                    if (overlaps)
+                    {
+                        return Results.Conflict();
+                    }
+                }
+            }
+        }
+
+        var calendarEventToCreate = new Event
+        {
+            Summary = $"Reunion con {request.Client.Name} ({request.Client.Company})",
+            Description = $"Email: {request.Client.Email}\nTelefono: {request.Client.Phone}\nMotivo: {request.Client.Reason}",
+            Start = new EventDateTime
+            {
+                DateTimeDateTimeOffset = slotStartUtc,
+                TimeZone = "UTC"
+            },
+            End = new EventDateTime
+            {
+                DateTimeDateTimeOffset = slotEndUtc,
+                TimeZone = "UTC"
+            },
+            Attendees = new List<EventAttendee>
+            {
+                new EventAttendee { Email = request.Client.Email },
+                new EventAttendee { Email = host.Email }
+            },
+            ConferenceData = new ConferenceData
+            {
+                CreateRequest = new CreateConferenceRequest
+                {
+                    RequestId = Guid.NewGuid().ToString()
+                }
+            }
+        };
+
+        var insertRequest = calendarService.Events.Insert(calendarEventToCreate, host.CalendarId);
+        insertRequest.ConferenceDataVersion = 1;
+        var createdEvent = await insertRequest.ExecuteAsync();
+        googleEventId = createdEvent?.Id;
+        googleMeetLink = createdEvent?.HangoutLink;
+    }
+
     var booking = new Booking
     {
         HostId = request.HostId,
@@ -278,6 +470,8 @@ app.MapPost("/api/book", async (SchediaDbContext db, BookRequest request) =>
         ClientPhone = request.Client.Phone,
         ClientReason = request.Client.Reason,
         Status = "booked",
+        GoogleEventId = googleEventId,
+        GoogleMeetLink = googleMeetLink,
         LegalTextId = request.LegalTextId,
         LegalAcceptedAtUtc = request.LegalAcceptedAtUtc.UtcDateTime,
         LegalAcceptedIp = request.LegalAcceptedIp,

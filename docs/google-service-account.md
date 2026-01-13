@@ -47,6 +47,24 @@ al crear las credenciales con la SA. Esto permite:
 Opcional si se usa JSON inline:
 - `GOOGLE_SERVICE_ACCOUNT_JSON`
 
+## 6.1) Donde guardar la configuracion
+
+Recomendado para desarrollo local:
+- `dotnet user-secrets` en `src/Schedia.Api`
+
+Alternativas:
+- Variables de entorno del sistema
+- `appsettings.Development.json` (solo si el archivo no se comparte)
+
+Seccion usada por el backend:
+- `GoogleAuth:ServiceAccountJsonPath`
+- `GoogleAuth:ServiceAccountJson`
+- `GoogleAuth:ImpersonationEnabled`
+- `GoogleAuth:Scopes`
+
+Opcional (nombre de la app en Google APIs):
+- `GoogleCalendar:ApplicationName`
+
 ## 7) Checklist rapido
 
 - API habilitada en el proyecto

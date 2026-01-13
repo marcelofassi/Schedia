@@ -138,3 +138,10 @@ D:\Work\Schedia\src\Schedia.Api\bin\Debug\net8.0\ru\Microsoft.CodeAnalysis.Works
 D:\Work\Schedia\src\Schedia.Api\bin\Debug\net8.0\tr\Microsoft.CodeAnalysis.Workspaces.resources.dll
 D:\Work\Schedia\src\Schedia.Api\bin\Debug\net8.0\zh-Hans\Microsoft.CodeAnalysis.Workspaces.resources.dll
 D:\Work\Schedia\src\Schedia.Api\bin\Debug\net8.0\zh-Hant\Microsoft.CodeAnalysis.Workspaces.resources.dll
+D:\Work\Schedia\src\Schedia.Api\bin\Debug\net8.0\Google.Apis.dll
+D:\Work\Schedia\src\Schedia.Api\bin\Debug\net8.0\Google.Apis.Auth.PlatformServices.dll
+D:\Work\Schedia\src\Schedia.Api\bin\Debug\net8.0\Google.Apis.Auth.dll
+D:\Work\Schedia\src\Schedia.Api\bin\Debug\net8.0\Google.Apis.Core.dll
+D:\Work\Schedia\src\Schedia.Api\bin\Debug\net8.0\Newtonsoft.Json.dll
+D:\Work\Schedia\src\Schedia.Api\bin\Debug\net8.0\System.Management.dll
+D:\Work\Schedia\src\Schedia.Api\bin\Debug\net8.0\runtimes\win\lib\net7.0\System.Management.dll

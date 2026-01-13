@@ -8,6 +8,111 @@ const RULES = {
   workDays: [1, 2, 3, 4, 5],
 };
 
+const COPY = {
+  es: {
+    heroTitle: "Agenda una reunion con el equipo de Diveria",
+    heroSubtitle:
+      "Selecciona un horario para reunirte con nuestro equipo. El anfitrion se define por el link.",
+    teamTitle: "Conoce al equipo",
+    teamSubtitle: "Lideres dedicados a impulsar tu transformacion digital.",
+    scheduleTitle: "Selecciona fecha y hora",
+    scheduleSubtitle: "Disponibilidad real segun el calendario del anfitrion.",
+    durationLabel: "Duracion de la reunion",
+    slotsLabel: "Horarios disponibles",
+    formTitle: "Tus datos",
+    formName: "Nombre",
+    formEmail: "Email",
+    formCompany: "Empresa",
+    formPhone: "Telefono",
+    formReason: "Motivo",
+    legalTitle: "Texto legal",
+    legalAccept: "Acepto el texto legal vigente.",
+    confirmCta: "Confirmar reserva",
+    confirmTitle: "Resumen previo",
+    confirmationTitle: "Reserva confirmada",
+    confirming: "Confirmando reserva...",
+    dateSelectedPrefix: "Fecha seleccionada",
+    hostPrefix: "Host",
+    tzPrefix: "Zona horaria",
+    langPrefix: "Idioma",
+    reviewSlot: "Slot",
+    reviewDuration: "Duracion",
+    reviewHost: "Host",
+    reviewEmail: "Email",
+    bookingConfirmed: "Reserva #{{id}} confirmada para {{slot}} ({{duration}} min) con {{host}}.",
+    loadingMeta: "Cargando anfitrion...",
+    loadingAvailability: "Cargando disponibilidad...",
+    noSlots: "No hay horarios disponibles.",
+    selectDayHint: "Selecciona un dia para ver horarios disponibles.",
+    selectSlotHint: "Selecciona un horario para continuar.",
+    acceptLegalHint: "Acepta el texto legal para continuar.",
+    slotSelected: "Slot seleccionado",
+    errorHost: "No se pudo cargar la informacion del anfitrion.",
+    errorBackend: "No se pudo conectar con el backend.",
+    errorAvailability: "No se pudo cargar disponibilidad.",
+    errorBooking: "No se pudo confirmar la reserva.",
+    errorBookingConflict:
+      "Ese horario ya no esta disponible. Elige otro slot.",
+    errorBookingInvalid: "Los datos de la reserva no son validos.",
+    errorBookingRate: "Demasiadas solicitudes. Intenta mas tarde.",
+    errorMissingHost: "Falta hostId en la URL. Usa ?hostId=1.",
+    confirmationEmail: "Te llegara una invitacion al correo",
+    formFallback: "Revisa los campos obligatorios.",
+    weekdays: ["Dom", "Lun", "Mar", "Mie", "Jue", "Vie", "Sab"],
+  },
+  en: {
+    heroTitle: "Book a meeting with the Diveria team",
+    heroSubtitle:
+      "Pick a time to meet our team. The host is defined by the link.",
+    teamTitle: "Meet the team",
+    teamSubtitle: "Leaders focused on your digital transformation.",
+    scheduleTitle: "Select date and time",
+    scheduleSubtitle: "Live availability from the host calendar.",
+    durationLabel: "Meeting duration",
+    slotsLabel: "Available times",
+    formTitle: "Your details",
+    formName: "Name",
+    formEmail: "Email",
+    formCompany: "Company",
+    formPhone: "Phone",
+    formReason: "Reason",
+    legalTitle: "Legal text",
+    legalAccept: "I accept the current legal text.",
+    confirmCta: "Confirm booking",
+    confirmTitle: "Review before confirming",
+    confirmationTitle: "Booking confirmed",
+    confirming: "Confirming booking...",
+    dateSelectedPrefix: "Selected date",
+    hostPrefix: "Host",
+    tzPrefix: "Time zone",
+    langPrefix: "Language",
+    reviewSlot: "Slot",
+    reviewDuration: "Duration",
+    reviewHost: "Host",
+    reviewEmail: "Email",
+    bookingConfirmed:
+      "Booking #{{id}} confirmed for {{slot}} ({{duration}} min) with {{host}}.",
+    loadingMeta: "Loading host...",
+    loadingAvailability: "Loading availability...",
+    noSlots: "No available times.",
+    selectDayHint: "Select a day to see available times.",
+    selectSlotHint: "Select a time to continue.",
+    acceptLegalHint: "Accept the legal text to continue.",
+    slotSelected: "Selected slot",
+    errorHost: "Could not load host information.",
+    errorBackend: "Could not connect to the backend.",
+    errorAvailability: "Could not load availability.",
+    errorBooking: "Could not confirm the booking.",
+    errorBookingConflict: "That time is no longer available. Pick another slot.",
+    errorBookingInvalid: "The booking data is not valid.",
+    errorBookingRate: "Too many requests. Try again later.",
+    errorMissingHost: "Missing hostId in the URL. Use ?hostId=1.",
+    confirmationEmail: "A calendar invite will be sent to",
+    formFallback: "Please review the required fields.",
+    weekdays: ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"],
+  },
+};
+
 const state = {
   apiBase: DEFAULT_API_BASE,
   hostId: null,
@@ -45,26 +150,66 @@ const el = {
   confirmationText: document.getElementById("confirmation-text"),
   teamList: document.getElementById("team-list"),
   legalAccept: document.getElementById("legal-accept"),
+  heroTitle: document.querySelector(".hero h1"),
+  heroSubtitle: document.querySelector(".hero p"),
+  teamTitle: document.querySelector(".team .card-title"),
+  teamSubtitle: document.querySelector(".team .card-subtitle"),
+  scheduleTitle: document.querySelector(".scheduler .card-title"),
+  scheduleSubtitle: document.querySelector(".scheduler .card-subtitle"),
+  durationLabel: document.querySelector(".section .label"),
+  weekdayLabels: document.querySelectorAll(".calendar-weekdays span"),
+  slotsLabel: document.querySelector(".slots .label"),
+  formTitle: document.querySelector(".form-section .label"),
+  nameLabel: document.querySelector("label[for='client-name']"),
+  emailLabel: document.querySelector("label[for='client-email']"),
+  companyLabel: document.querySelector("label[for='client-company']"),
+  phoneLabel: document.querySelector("label[for='client-phone']"),
+  reasonLabel: document.querySelector("label[for='client-reason']"),
+  legalTitle: document.querySelector(".legal-title"),
+  legalAcceptLabel: document.querySelector(".checkbox"),
+  confirmCta: document.getElementById("book-btn"),
+  confirmationTitle: document.querySelector(".confirmation-title"),
+  reviewBlock: null,
+  reviewContent: null,
 };
 
 const team = [
-  { name: "Leandro Marin", role: "Director y Co-founder" },
-  { name: "Cristian Impini", role: "COO y Co-founder" },
-  { name: "Marcelo Fassi", role: "Director y Co-founder" },
-  { name: "Agustin Catellani", role: "Socio" },
-  { name: "Nicolas Padula", role: "CTO" },
+  {
+    name: "Leandro Marin",
+    roleEs: "Director y Co-founder",
+    roleEn: "Director and Co-founder",
+  },
+  {
+    name: "Cristian Impini",
+    roleEs: "COO y Co-founder",
+    roleEn: "COO and Co-founder",
+  },
+  {
+    name: "Marcelo Fassi",
+    roleEs: "Director y Co-founder",
+    roleEn: "Director and Co-founder",
+  },
+  {
+    name: "Agustin Catellani",
+    roleEs: "Socio",
+    roleEn: "Partner",
+  },
+  {
+    name: "Nicolas Padula",
+    roleEs: "CTO",
+    roleEn: "CTO",
+  },
 ];
 
 function init() {
-  hydrateTeam();
   readParams();
+  hydrateTeam();
+  applyCopy();
   bindEvents();
   renderDuration();
 
   if (!state.hostId) {
-    showError(
-      "Falta hostId en la URL. Usa ?hostId=1 para cargar el anfitrion."
-    );
+    showError(t("errorMissingHost"));
     disableBooking();
     return;
   }
@@ -75,6 +220,7 @@ function init() {
 
 function hydrateTeam() {
   team.forEach((member, index) => {
+    const role = state.lang === "en" ? member.roleEn : member.roleEs;
     const li = document.createElement("li");
     li.className = "team-card";
     li.style.animationDelay = `${index * 0.08}s`;
@@ -82,7 +228,7 @@ function hydrateTeam() {
       <div class="avatar">${initials(member.name)}</div>
       <div>
         <div class="team-name">${member.name}</div>
-        <div class="team-role">${member.role}</div>
+        <div class="team-role">${role}</div>
       </div>
     `;
     el.teamList.appendChild(li);
@@ -131,6 +277,7 @@ function bindEvents() {
     state.selectedSlot = null;
     renderCalendar();
     renderSlots();
+    renderReview();
   });
 
   el.slotGrid.addEventListener("click", (event) => {
@@ -139,6 +286,7 @@ function bindEvents() {
     state.selectedSlot = slotBtn.dataset.slot;
     renderSlots();
     updateFormState();
+    renderReview();
   });
 
   el.form.addEventListener("submit", (event) => {
@@ -149,44 +297,41 @@ function bindEvents() {
   el.form.addEventListener("input", () => {
     validateForm(false);
     updateFormState();
+    renderReview();
   });
 
-  el.langToggle.addEventListener("click", () => {
-    const nextLang = state.lang === "es" ? "en" : "es";
-    const params = new URLSearchParams(window.location.search);
-    params.set("lang", nextLang);
-    window.location.search = params.toString();
-  });
+  el.langToggle.addEventListener("click", () => switchLanguage());
 }
 
 async function updateMeta() {
-  setLoading("Cargando anfitrion...");
+  setLoading(t("loadingMeta"));
   try {
     const response = await fetch(
       `${state.apiBase}/api/meta?hostId=${state.hostId}&lang=${state.lang}`
     );
     if (!response.ok) {
-      showError("No se pudo cargar la informacion del anfitrion.");
+      showError(t("errorHost"));
       disableBooking();
       return;
     }
     const data = await response.json();
     state.hostName = data.hostName || "";
     state.hostRole = data.hostRoleTitle || "";
-    el.hostPill.textContent = `Host: ${state.hostName}`;
-    el.tzPill.textContent = `Zona horaria: ${state.timeZone}`;
-    el.langToggle.textContent = `Idioma: ${state.lang.toUpperCase()}`;
+    el.hostPill.textContent = `${t("hostPrefix")}: ${state.hostName}`;
+    el.tzPill.textContent = `${t("tzPrefix")}: ${state.timeZone}`;
+    el.langToggle.textContent = `${t("langPrefix")}: ${state.lang.toUpperCase()}`;
     el.legalBody.textContent = data.legalTextBody || "";
     state.legalTextId = data.legalTextId ?? 1;
+    renderReview();
   } catch (error) {
-    showError("No se pudo conectar con el backend.");
+    showError(t("errorBackend"));
     disableBooking();
   }
 }
 
 async function loadAvailability() {
   if (!state.hostId) return;
-  setLoading("Cargando disponibilidad...");
+  setLoading(t("loadingAvailability"));
 
   const now = new Date();
   const rangeStart = new Date(
@@ -208,7 +353,7 @@ async function loadAvailability() {
       }),
     });
     if (!response.ok) {
-      showError("No se pudo cargar disponibilidad.");
+      showError(t("errorAvailability"));
       return;
     }
     const data = await response.json();
@@ -221,7 +366,7 @@ async function loadAvailability() {
     updateFormState();
     clearError();
   } catch (error) {
-    showError("No se pudo conectar con el backend.");
+    showError(t("errorBackend"));
   }
 }
 
@@ -235,7 +380,7 @@ function renderDuration() {
 function renderCalendar() {
   clampMonthToRange();
   const month = state.currentMonth;
-  const monthLabel = month.toLocaleString("es-ES", {
+  const monthLabel = month.toLocaleString(getLocale(), {
     month: "long",
     year: "numeric",
   });
@@ -266,8 +411,8 @@ function renderCalendar() {
   });
 
   el.calendarHint.textContent = state.selectedDate
-    ? `Fecha seleccionada: ${formatDateLabel(state.selectedDate)}`
-    : "Selecciona un dia para ver horarios disponibles.";
+    ? `${t("dateSelectedPrefix")}: ${formatDateLabel(state.selectedDate)}`
+    : t("selectDayHint");
 
   updateMonthNavState();
 }
@@ -280,7 +425,7 @@ function renderSlots() {
 
   if (!slots.length) {
     el.slotGrid.innerHTML =
-      "<div class='form-note'>No hay horarios disponibles.</div>";
+      `<div class='form-note'>${t("noSlots")}</div>`;
     return;
   }
 
@@ -301,14 +446,14 @@ function updateFormState() {
   const isReady = Boolean(state.selectedSlot && el.legalAccept?.checked);
   el.bookBtn.disabled = !isReady;
   if (!state.selectedSlot) {
-    el.formNote.textContent = "Selecciona un horario para continuar.";
+    el.formNote.textContent = t("selectSlotHint");
     return;
   }
   if (!el.legalAccept?.checked) {
-    el.formNote.textContent = "Acepta el texto legal para continuar.";
+    el.formNote.textContent = t("acceptLegalHint");
     return;
   }
-  el.formNote.textContent = `Slot seleccionado: ${formatTime(
+  el.formNote.textContent = `${t("slotSelected")}: ${formatTime(
     state.selectedSlot
   )}`;
 }
@@ -319,7 +464,7 @@ async function submitBooking() {
     return;
   }
   el.bookBtn.disabled = true;
-  el.formNote.textContent = "Confirmando reserva...";
+  el.formNote.textContent = t("confirming");
 
   const formData = new FormData(el.form);
   const payload = {
@@ -347,17 +492,23 @@ async function submitBooking() {
       body: JSON.stringify(payload),
     });
     if (!response.ok) {
-      el.formNote.textContent = "No se pudo confirmar la reserva.";
+      await handleBookingError(response);
       el.bookBtn.disabled = false;
       return;
     }
     const data = await response.json();
     el.confirmation.hidden = false;
     const slotLabel = formatDateTime(state.selectedSlot);
-    el.confirmationText.textContent = `Reserva #${data.bookingId} confirmada para ${slotLabel} (${state.duration} min) con ${state.hostName}.`;
-    el.formNote.textContent = `Te llegara una invitacion al correo ${payload.client.email}.`;
+    el.confirmationText.textContent = formatTemplate(t("bookingConfirmed"), {
+      id: data.bookingId,
+      slot: slotLabel,
+      duration: state.duration,
+      host: state.hostName,
+    });
+    el.formNote.textContent = `${t("confirmationEmail")} ${payload.client.email}.`;
+    disableFormInputs();
   } catch (error) {
-    el.formNote.textContent = "Error de conexion al confirmar la reserva.";
+    el.formNote.textContent = t("errorBackend");
   } finally {
     el.bookBtn.disabled = false;
   }
@@ -417,7 +568,7 @@ function endOfMonth(date) {
 
 function formatTime(isoString) {
   const date = new Date(isoString);
-  return date.toLocaleTimeString("es-AR", {
+  return date.toLocaleTimeString(getLocale(), {
     hour: "2-digit",
     minute: "2-digit",
   });
@@ -425,7 +576,7 @@ function formatTime(isoString) {
 
 function formatDateTime(isoString) {
   const date = new Date(isoString);
-  return date.toLocaleString("es-AR", {
+  return date.toLocaleString(getLocale(), {
     weekday: "long",
     day: "numeric",
     month: "long",
@@ -436,7 +587,7 @@ function formatDateTime(isoString) {
 
 function formatDateLabel(dateString) {
   const date = new Date(dateString);
-  return date.toLocaleDateString("es-AR", {
+  return date.toLocaleDateString(getLocale(), {
     weekday: "long",
     day: "numeric",
     month: "long",
@@ -482,6 +633,13 @@ function setLoading(message) {
 
 function disableBooking() {
   el.bookBtn.disabled = true;
+}
+
+function disableFormInputs() {
+  const inputs = el.form.querySelectorAll("input, textarea, button");
+  inputs.forEach((input) => {
+    input.disabled = true;
+  });
 }
 
 function clampMonthToRange() {
@@ -542,14 +700,14 @@ function validateForm(showMessages) {
     } else {
       input.setAttribute("aria-invalid", "true");
       if (!message) {
-        message = input.validationMessage || "Revisa los campos obligatorios.";
+        message = input.validationMessage || t("formFallback");
       }
     }
   });
 
   const legalAccept = document.getElementById("legal-accept");
   if (legalAccept && !legalAccept.checked) {
-    message = message || "Debes aceptar el texto legal para continuar.";
+    message = message || t("acceptLegalHint");
   }
 
   if (showMessages && message) {
@@ -594,6 +752,106 @@ function isSlotWithinRules(slot) {
   if (startMinutes < RULES.workStartHour * 60) return false;
   if (endMinutes > RULES.workEndHour * 60) return false;
   return true;
+}
+
+function applyCopy() {
+  const copy = COPY[state.lang];
+  if (!copy) return;
+  document.documentElement.lang = state.lang;
+  el.heroTitle.textContent = copy.heroTitle;
+  el.heroSubtitle.textContent = copy.heroSubtitle;
+  el.teamTitle.textContent = copy.teamTitle;
+  el.teamSubtitle.textContent = copy.teamSubtitle;
+  el.scheduleTitle.textContent = copy.scheduleTitle;
+  el.scheduleSubtitle.textContent = copy.scheduleSubtitle;
+  el.durationLabel.textContent = copy.durationLabel;
+  if (el.weekdayLabels?.length === copy.weekdays.length) {
+    el.weekdayLabels.forEach((label, index) => {
+      label.textContent = copy.weekdays[index];
+    });
+  }
+  el.slotsLabel.textContent = copy.slotsLabel;
+  el.formTitle.textContent = copy.formTitle;
+  el.nameLabel.textContent = copy.formName;
+  el.emailLabel.textContent = copy.formEmail;
+  el.companyLabel.textContent = copy.formCompany;
+  el.phoneLabel.textContent = copy.formPhone;
+  el.reasonLabel.textContent = copy.formReason;
+  el.legalTitle.textContent = copy.legalTitle;
+  el.legalAcceptLabel.lastChild.textContent = ` ${copy.legalAccept}`;
+  el.confirmCta.textContent = copy.confirmCta;
+  el.confirmationTitle.textContent = copy.confirmationTitle;
+}
+
+function t(key) {
+  return COPY[state.lang]?.[key] || COPY.es[key] || key;
+}
+
+async function handleBookingError(response) {
+  if (response.status === 409) {
+    el.formNote.textContent = t("errorBookingConflict");
+    return;
+  }
+  if (response.status === 404 || response.status === 400) {
+    el.formNote.textContent = t("errorBookingInvalid");
+    return;
+  }
+  if (response.status === 429) {
+    el.formNote.textContent = t("errorBookingRate");
+    return;
+  }
+  el.formNote.textContent = t("errorBooking");
+}
+
+function renderReview() {
+  if (!el.reviewBlock) {
+    const block = document.createElement("div");
+    block.className = "section review";
+    block.innerHTML = `
+      <div class="label">${t("confirmTitle")}</div>
+      <div class="review-card">
+        <div id="review-content">--</div>
+      </div>
+    `;
+    const formSection = document.getElementById("form-section");
+    formSection?.parentNode?.insertBefore(block, formSection);
+    el.reviewBlock = block;
+    el.reviewContent = block.querySelector("#review-content");
+  }
+
+  const slotText = state.selectedSlot
+    ? formatDateTime(state.selectedSlot)
+    : "--";
+  const durationText = `${state.duration} min`;
+  const hostText = state.hostName || "--";
+  const emailInput = document.getElementById("client-email");
+  const emailText = emailInput?.value || "--";
+
+  if (el.reviewContent) {
+    el.reviewContent.innerHTML = `
+      <div><strong>${t("reviewSlot")}:</strong> ${slotText}</div>
+      <div><strong>${t("reviewDuration")}:</strong> ${durationText}</div>
+      <div><strong>${t("reviewHost")}:</strong> ${hostText}</div>
+      <div><strong>${t("reviewEmail")}:</strong> ${emailText}</div>
+    `;
+  }
+}
+
+function switchLanguage() {
+  const nextLang = state.lang === "es" ? "en" : "es";
+  const params = new URLSearchParams(window.location.search);
+  params.set("lang", nextLang);
+  window.location.search = params.toString();
+}
+
+function getLocale() {
+  return state.lang === "en" ? "en-US" : "es-AR";
+}
+
+function formatTemplate(template, values) {
+  return template.replace(/\{\{(\w+)\}\}/g, (match, key) =>
+    Object.prototype.hasOwnProperty.call(values, key) ? values[key] : match
+  );
 }
 
 document.addEventListener("DOMContentLoaded", init);
