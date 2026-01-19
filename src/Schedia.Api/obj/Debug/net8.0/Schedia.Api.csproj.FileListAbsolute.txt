@@ -145,3 +145,4 @@ D:\Work\Schedia\src\Schedia.Api\bin\Debug\net8.0\Google.Apis.Core.dll
 D:\Work\Schedia\src\Schedia.Api\bin\Debug\net8.0\Newtonsoft.Json.dll
 D:\Work\Schedia\src\Schedia.Api\bin\Debug\net8.0\System.Management.dll
 D:\Work\Schedia\src\Schedia.Api\bin\Debug\net8.0\runtimes\win\lib\net7.0\System.Management.dll
+D:\Work\Schedia\src\Schedia.Api\bin\Debug\net8.0\Google.Apis.Calendar.v3.dll

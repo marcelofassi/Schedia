@@ -58,17 +58,19 @@ body {
 }
 
 .brand {
-  font-family: "Space Grotesk", sans-serif;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--primary-strong);
-  font-weight: 600;
-  margin-bottom: 16px;
+  display: inline-flex;
+  align-items: center;
+  margin-bottom: 18px;
+}
+
+.brand-logo {
+  height: 28px;
+  width: auto;
 }
 
 .hero h1 {
   font-family: "Space Grotesk", sans-serif;
-  font-size: clamp(2.4rem, 4vw, 3.6rem);
+  font-size: clamp(2rem, 3.5vw, 3rem);
   margin: 0 0 12px;
 }
 
@@ -91,10 +93,11 @@ body {
   gap: 8px;
   background: rgba(15, 105, 255, 0.08);
   color: var(--primary-strong);
-  padding: 8px 14px;
+  padding: 6px 12px;
   border-radius: 999px;
   font-weight: 600;
   border: 1px solid rgba(15, 105, 255, 0.2);
+  font-size: 0.85rem;
 }
 
 .pill.ghost {

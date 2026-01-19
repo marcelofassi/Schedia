@@ -388,7 +388,6 @@ app.MapPost("/api/book", async (SchediaDbContext db, BookRequest request) =>
             ApplicationName = googleOptions.ApplicationName
         });
 
-        var buffer = TimeSpan.FromMinutes(15);
         var windowStartUtc = slotStartUtc.Subtract(buffer);
         var windowEndUtc = slotEndUtc.Add(buffer);
 

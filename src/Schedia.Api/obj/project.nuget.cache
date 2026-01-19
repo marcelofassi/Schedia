@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "bktb2MMt+34=",
+  "dgSpecHash": "sAfw52LyJrM=",
   "success": true,
   "projectFilePath": "D:\\Work\\Schedia\\src\\Schedia.Api\\Schedia.Api.csproj",
   "expectedPackageFiles": [
@@ -92,16 +92,16 @@
     "C:\\Users\\marcelofassi\\.nuget\\packages\\system.threading.channels\\6.0.0\\system.threading.channels.6.0.0.nupkg.sha512",
     "C:\\Users\\marcelofassi\\.nuget\\packages\\system.threading.tasks.extensions\\4.5.4\\system.threading.tasks.extensions.4.5.4.nupkg.sha512",
     "C:\\Users\\marcelofassi\\.nuget\\packages\\system.windows.extensions\\6.0.0\\system.windows.extensions.6.0.0.nupkg.sha512",
-    "C:\\Users\\marcelofassi\\.nuget\\packages\\microsoft.netcore.app.ref\\8.0.22\\microsoft.netcore.app.ref.8.0.22.nupkg.sha512",
-    "C:\\Users\\marcelofassi\\.nuget\\packages\\microsoft.windowsdesktop.app.ref\\8.0.22\\microsoft.windowsdesktop.app.ref.8.0.22.nupkg.sha512",
-    "C:\\Users\\marcelofassi\\.nuget\\packages\\microsoft.aspnetcore.app.ref\\8.0.22\\microsoft.aspnetcore.app.ref.8.0.22.nupkg.sha512",
-    "C:\\Users\\marcelofassi\\.nuget\\packages\\microsoft.netcore.app.host.win-x64\\8.0.22\\microsoft.netcore.app.host.win-x64.8.0.22.nupkg.sha512"
+    "C:\\Users\\marcelofassi\\.nuget\\packages\\microsoft.netcore.app.ref\\8.0.23\\microsoft.netcore.app.ref.8.0.23.nupkg.sha512",
+    "C:\\Users\\marcelofassi\\.nuget\\packages\\microsoft.windowsdesktop.app.ref\\8.0.23\\microsoft.windowsdesktop.app.ref.8.0.23.nupkg.sha512",
+    "C:\\Users\\marcelofassi\\.nuget\\packages\\microsoft.aspnetcore.app.ref\\8.0.23\\microsoft.aspnetcore.app.ref.8.0.23.nupkg.sha512",
+    "C:\\Users\\marcelofassi\\.nuget\\packages\\microsoft.netcore.app.host.win-x64\\8.0.23\\microsoft.netcore.app.host.win-x64.8.0.23.nupkg.sha512"
   ],
   "logs": [
     {
       "code": "NU1603",
       "level": "Warning",
-      "message": "Schedia.Api depends on Google.Apis.Calendar.v3 (>= 1.65.0) but Google.Apis.Calendar.v3 1.65.0 was not found. Google.Apis.Calendar.v3 1.65.0.3270 was resolved instead.",
+      "message": "Schedia.Api depende de Google.Apis.Calendar.v3 (>= 1.65.0), pero no se encontró Google.Apis.Calendar.v3 1.65.0. Google.Apis.Calendar.v3 1.65.0.3270 se resolvió en su lugar.",
       "projectPath": "D:\\Work\\Schedia\\src\\Schedia.Api\\Schedia.Api.csproj",
       "warningLevel": 1,
       "filePath": "D:\\Work\\Schedia\\src\\Schedia.Api\\Schedia.Api.csproj",

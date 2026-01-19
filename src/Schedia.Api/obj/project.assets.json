@@ -4880,19 +4880,19 @@
         "downloadDependencies": [
           {
             "name": "Microsoft.AspNetCore.App.Ref",
-            "version": "[8.0.22, 8.0.22]"
+            "version": "[8.0.23, 8.0.23]"
           },
           {
             "name": "Microsoft.NETCore.App.Host.win-x64",
-            "version": "[8.0.22, 8.0.22]"
+            "version": "[8.0.23, 8.0.23]"
           },
           {
             "name": "Microsoft.NETCore.App.Ref",
-            "version": "[8.0.22, 8.0.22]"
+            "version": "[8.0.23, 8.0.23]"
           },
           {
             "name": "Microsoft.WindowsDesktop.App.Ref",
-            "version": "[8.0.22, 8.0.22]"
+            "version": "[8.0.23, 8.0.23]"
           }
         ],
         "frameworkReferences": {
@@ -4903,7 +4903,7 @@
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.307/PortableRuntimeIdentifierGraph.json"
+        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.309/PortableRuntimeIdentifierGraph.json"
       }
     }
   },
@@ -4912,7 +4912,7 @@
       "code": "NU1603",
       "level": "Warning",
       "warningLevel": 1,
-      "message": "Schedia.Api depends on Google.Apis.Calendar.v3 (>= 1.65.0) but Google.Apis.Calendar.v3 1.65.0 was not found. Google.Apis.Calendar.v3 1.65.0.3270 was resolved instead.",
+      "message": "Schedia.Api depende de Google.Apis.Calendar.v3 (>= 1.65.0), pero no se encontró Google.Apis.Calendar.v3 1.65.0. Google.Apis.Calendar.v3 1.65.0.3270 se resolvió en su lugar.",
       "libraryId": "Google.Apis.Calendar.v3",
       "targetGraphs": [
         "net8.0"
